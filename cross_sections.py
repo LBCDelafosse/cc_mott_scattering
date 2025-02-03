@@ -11,22 +11,27 @@ def cosec(x):
 
 def yaxis(xaxis, plot_instructions, A1, Z1, A2, Z2, initial_v, total_spin):
     """
+    Computes theoretical cross-sections for a given collision.
+
     xaxis: numpy array
-        list of angles at which measurements are done, in radians
+        List of angles at which measurements are done, in radians.
     plot_instructions: string
-        determines the theoretical curve to plot (possible values: 'rutherford', 'ind_rutherford', 'mott', 'exp')
+        Determines the theoretical curve to plot (possible values: 'rutherford', 'mott').
     A1: int
-        mass number of the beam particle
-    A2: int
-        mass number of the target particle
+        Mass number of the beam particle.
     Z1: int
-        charge number of the beam particle
+        Charge number of the beam particle.
+    A2: int
+        Mass number of the target particle.
     Z2: int
-        charge number of the target particle
+        Charge number of the target particle.
     initial_v: float
-        initial velocity of the beam particle in the lab frame, in SI units
+        Initial velocity of the beam particle in the lab frame, in SI units.
     total_spin: float
-        total spin of the target/beam atom when they are indistinguishable
+        Total spin of the target/beam atom when they are indistinguishable.
+
+    Returns:
+        numpy array: List of theoretical cross-sections, for each angle.
     """
 
     nb_entries = len(xaxis)
@@ -40,36 +45,38 @@ def yaxis(xaxis, plot_instructions, A1, Z1, A2, Z2, initial_v, total_spin):
         for index in range(nb_entries):
             theta = xaxis[index]
             yaxis[index] = n*n / (4.*k*k) * cosec(theta/2.)**4 #SI units
-            yaxis[index] *= 10**(28) #conversion in barns
-
-    if 'ind_rutherford' in plot_instructions:
-        for index in range(nb_entries):
-            theta = xaxis[index]
-            yaxis[index] = n*n / (4.*k*k) * ( cosec(theta)**4 - cosec(np.pi - theta)**4 ) #SI units
-            yaxis[index] *= 10**(28) #conversion in barns
+            if A1 != A2:
+                absorption_factor = np.exp(-np.abs(A1 - A2) / (A1 + A2))
+                yaxis[index] *= absorption_factor
+            yaxis[index] *= 10**28 #conversion in barns
 
     if 'mott' in plot_instructions:
         for index in range(nb_entries):
             theta = xaxis[index]
             yaxis[index] = n*n / (4.*k*k) * ( cosec(theta/2.)**4 + sec(theta/2.)**4 + 2*(-1)**(2*total_spin)/(2*total_spin+1) * np.cos(n * np.log(np.tan(theta/2.)**2)) * cosec(theta/2.)**2 * sec(theta/2.)**2 ) #SI units
-            yaxis[index] *= 10**(28) #conversion in barns
+            yaxis[index] *= 10**28 #conversion in barns
 
     return yaxis
 
 def plot(xaxis, yaxes, linetypes, labels, xlabel, ylabel):
     """
+    Plots a graph
+
     xaxis: numpy array
-        list of angles at which measurements are done, in radians
+        List of angles at which measurements are done, in radians.
     yaxes: list of numpy arrays
-        list of curves to plot
+        List of curves to plot.
     linetypes: list of strings
-        list of instructions indicating the type of curve to plot
+        List of instructions indicating the type of curve to plot.
     labels: list of strings
-        list of the labels for each curve to plot
+        List of the labels for each curve to plot.
     xlabel: string
-        label of the x axis
+        Label of the x axis.
     ylabel: string
-        label of the y axis
+        Label of the y axis.
+
+    Returns:
+        Nothing.
     """
 
     nb_curves = len(yaxes)
@@ -135,10 +142,16 @@ def example_phase_shifts(l, E_COM):
     return np.arctan(E_COM / ((l + 1) * 10))  # Arbitrary example
 
 def plot_scattering_cross_section():
+    """
+    Unfinished function
+    """
     E_COM_axis = np.linspace(0.01, 10, 500)  # Center-of-mass energy in MeV
     l_max = 5  # Maximum l to consider
 
-    cross_sections = [scattering_cross_section(E_COM, l_max, example_phase_shifts) for E_COM in E_COM_axis]
+    cross_sections = [
+        scattering_cross_section(E_COM, l_max, example_phase_shifts)
+        for E_COM in E_COM_axis
+    ]
 
 
 theta_start = 5 * np.pi/180 #initial angle for plot in radians
