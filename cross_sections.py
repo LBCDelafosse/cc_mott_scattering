@@ -115,17 +115,16 @@ def plot(xaxis, yaxes, linetypes, labels, xlabel, ylabel):
 
     nb_curves = len(yaxes)
     xaxis *= 180/np.pi #conversion in degrees
-
-    plt.rc('font',  family='serif')  # Type of font 
-    plt.rc('xtick', labelsize='20')  # Size of the xtick label 
-    plt.rc('ytick', labelsize='20')  # Size of the ytick label
-    plt.rc('lines', linewidth='3')   # Width of the curves  
-    plt.rc('legend', framealpha='1') # Transparency of the legend frame
-    plt.rc('legend', fontsize='23')  # Size of the legend
-    plt.rc('grid', linestyle='--')   # Grid formed by dashed lines 
-    plt.rcParams.update(
-        { "text.usetex": True } # Using LaTex style for text and equation
-    )
+    plt.rcParams.update({
+        "font.family": "serif",   # Type of font
+        "xtick.labelsize": "20",  # Size of the xtick label
+        "ytick.labelsize": "20",  # Size of the ytick label
+        "lines.linewidth": "3",   # Width of the curves
+        "legend.framealpha": "1", # Transparency of the legend frame
+        "legend.fontsize": "23",  # Size of the legend
+        "grid.linestyle":"--",    # Grid formed by dashed lines
+        "text.usetex": True       # Using LaTex style for text and equation
+    })
     
     fig, ( fig1 ) = plt.subplots( figsize=(8, 6) )
     
@@ -201,16 +200,4 @@ au_yaxis = rutherford_cross_sections(angles, A1, Z1, A2, Z2, E_COM)
 #plot(angles, [au_yaxis, c_yaxis], ['r--','k--'], ['Gold','Carbon'], xlabel, ylabel)
 #plot(angles, [spin0_yaxis, spin1_yaxis, spin2_yaxis], ['k-','b--','r:'], ['I=0','I=1','I=2'], xlabel, ylabel)
 
-detector_angle = 30 * np.pi/180 #angle of the detector in the lab frame in radians
-det_solid_angle = 2*np.pi * (1. - 1. / np.sqrt(1. + (40./125.)**2))
-particle_nb = 10e7
-au_target_density = 100. * 1./(2.7e-10)**2
-c_target_density = 100. * 1./(1.5e-10)**2
-au_det_energy, au_nb_counts = number_of_counts(detector_angle, det_solid_angle, particle_nb, au_target_density, 12, 6, 197, 79, E_COM)
-c_det_energy, c_nb_counts = number_of_counts(detector_angle, det_solid_angle, particle_nb, c_target_density, 12, 6, 12, 6, E_COM)
-
-xaxis = [au_det_energy, c_det_energy]
-yaxis = [au_nb_counts, c_nb_counts]
-#plt.scatter(xaxis, yaxis, marker='o')
-#plt.show()
 
