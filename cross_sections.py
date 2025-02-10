@@ -1,6 +1,9 @@
 import numpy as np
 import scipy.constants as cst
 import matplotlib.pyplot as plt
+from sklearn.linear_model import LinearRegression
+from sklearn.metrics import r2_score
+import calibration as calb
 
 
 def sec(x):
@@ -15,10 +18,12 @@ def cosec(x):
     """
     return 1./np.sin(x)
 
-def rutherford_cross_sections(angles, A1, Z1, A2, Z2, E_COM):
+def rutherford_cross_sections(angles, A1, Z1, A2, Z2, E_beam):
     """
     Computes theoretical Rutherford cross-sections for a given collision.
 
+    Parameters
+    ----------
     angles: numpy array
         List of angles at which measurements are done in the COM frame, in radians.
     A1: int
@@ -29,13 +34,15 @@ def rutherford_cross_sections(angles, A1, Z1, A2, Z2, E_COM):
         Mass number of the target particle.
     Z2: int
         Charge number of the target particle.
-    E_COM: float
-        Center-of-mass energy in MeV.
+    E_beam: float
+        Lab frame beam energy in MeV.
 
-    Returns:
-        numpy array: List of theoretical Rutherford cross-sections, for each angle in the COM frame, in mb.
+    Returns
+    -------
+    cross_sections: numpy array
+        List of theoretical Rutherford cross-sections, for each angle in the COM frame, in mb.
     """
-
+    E_COM = E_beam * A2 / (A1+A2) #center-of-mass energy in MeV
     nb_entries = len(angles)
     mu = cst.m_n * A1 * A2 / (A1 + A2)
     initial_v = np.sqrt(E_COM*(10**6)*cst.e*2/mu)
@@ -54,10 +61,12 @@ def rutherford_cross_sections(angles, A1, Z1, A2, Z2, E_COM):
 
     return cross_sections
 
-def mott_cross_sections(angles, A1, Z1, A2, Z2, E_COM, total_spin):
+def mott_cross_sections(angles, A1, Z1, A2, Z2, E_beam, total_spin):
     """
     Computes theoretical Mott cross-sections for a given collision.
 
+    Parameters
+    ----------
     angles: numpy array
         List of angles at which measurements are done in COM frame, in radians.
     A1: int
@@ -68,15 +77,17 @@ def mott_cross_sections(angles, A1, Z1, A2, Z2, E_COM, total_spin):
         Mass number of the target particle.
     Z2: int
         Charge number of the target particle.
-    E_COM: float
-        Center-of-mass energy in MeV.
+    E_beam: float
+        Lab frame beam energy in MeV.
     total_spin: float
         Total spin of the target/beam atom when they are indistinguishable.
 
-    Returns:
-        numpy array: List of theoretical Mott cross-sections, for each angle in the COM frame, in mb.
+    Returns
+    -------
+    cross_sections: numpy array
+        List of theoretical Mott cross-sections, for each angle in the COM frame, in mb.
     """
-
+    E_COM = E_beam * A2 / (A1+A2) #center-of-mass energy in MeV
     nb_entries = len(angles)
     mu = cst.m_n * A1 * A2 / (A1 + A2)
     initial_v = np.sqrt(E_COM*(10**6)*cst.e*2/mu)
@@ -94,8 +105,10 @@ def mott_cross_sections(angles, A1, Z1, A2, Z2, E_COM, total_spin):
 
 def plot(xaxis, yaxes, linetypes, labels, xlabel, ylabel):
     """
-    Plots a graph
+    Plots a graph.
 
+    Parameters
+    ----------
     xaxis: numpy array
         List of angles at which measurements are done, in radians.
     yaxes: list of numpy arrays
@@ -109,8 +122,9 @@ def plot(xaxis, yaxes, linetypes, labels, xlabel, ylabel):
     ylabel: string
         Label of the y axis.
 
-    Returns:
-        Nothing.
+    Returns
+    -------
+    Nothing.
     """
 
     nb_curves = len(yaxes)
@@ -144,6 +158,8 @@ def number_of_counts(detector_angle, det_solid_angle, particle_nb, target_densit
     """
     Computes the theoretical number of counts for the detected energy (Rutherford scattering).
 
+    Parameters
+    ----------
     detector angle: float
         Angle at which the detector is placed in the lab frame, in radians.
     det_solid_angle: float
@@ -163,9 +179,12 @@ def number_of_counts(detector_angle, det_solid_angle, particle_nb, target_densit
     E_COM: float
         Center-of-mass energy in MeV.
 
-    Returns:
-        float: Detected energy in MeV.
-        int: Number of counts.
+    Returns
+    -------
+    det_energy: float
+        Detected energy in MeV.
+    nb_counts: int
+        Number of counts.
     """
     gamma = A1/A2
     conversion_numerator = gamma * np.cos(detector_angle) + np.sqrt(1. - gamma**2*np.sin(detector_angle)**2)
@@ -174,30 +193,33 @@ def number_of_counts(detector_angle, det_solid_angle, particle_nb, target_densit
     print(theta_COM * 180 / np.pi, '°')
     [cross_section_COM] = rutherford_cross_sections([theta_COM], A1, Z1, A2, Z2, E_COM)
     print('cross-section COM =', cross_section_COM, 'mb')
-    cross_section = cross_section_COM * conversion_numerator / np.sqrt(1. - gamma**2 * np.sin(detector_angle)**2) #takes the cross-section to the lab frame, in mb
+    cross_section = cross_section_COM * conversion_numerator / np.sqrt(1. - gamma**2 * np.sin(detector_angle)**2) #take the cross-section to the lab frame, in mb
     print('cross-section =', cross_section, 'mb')
     nb_counts = det_solid_angle * cross_section * 10**(-31) * particle_nb * target_density
     print('det_energy =', det_energy, 'MeV, nb_counts =', nb_counts)
     return det_energy, nb_counts
 
+if __name__ == "main":
+    theta_start = 5 * np.pi/180 #initial angle for plot in radians
+    theta_stop = 175* np.pi/180 #final angle for plot in radians
+    angles = np.linspace(theta_start, theta_stop, 10000)
+    E_beam = 3. #lab frame energy of the beam particles
 
-theta_start = 5 * np.pi/180 #initial angle for plot in radians
-theta_stop = 175* np.pi/180 #final angle for plot in radians
-angles = np.linspace(theta_start, theta_stop, 10000)
-E_COM = 4. #center-of-mass energy in MeV
+    A1,Z1,A2,Z2 = 12,6,12,6 #collision on carbon
+    c_yaxis = rutherford_cross_sections(angles, A1, Z1, A2, Z2, E_beam)
+    A1,Z1,A2,Z2 = 12,6,197,79 #collision on gold
+    au_yaxis = rutherford_cross_sections(angles, A1, Z1, A2, Z2, E_beam)
 
-A1,Z1,A2,Z2 = 12,6,12,6 #collision on carbon
-c_yaxis = rutherford_cross_sections(angles, A1, Z1, A2, Z2, E_COM)
-A1,Z1,A2,Z2 = 12,6,197,79 #collision on gold
-au_yaxis = rutherford_cross_sections(angles, A1, Z1, A2, Z2, E_COM)
+    #spin0_yaxis = mott_cross_sections(angles, A1, Z1, A2, Z2, E_beam, 0)
+    #spin1_yaxis = mott_cross_sections(angles, A1, Z1, A2, Z2, E_beam, 1)
+    #spin2_yaxis = mott_cross_sections(angles, A1, Z1, A2, Z2, E_beam, 2)
 
-#spin0_yaxis = mott_cross_sections(angles, A1, Z1, A2, Z2, E_COM, 0)
-#spin1_yaxis = mott_cross_sections(angles, A1, Z1, A2, Z2, E_COM, 1)
-#spin2_yaxis = mott_cross_sections(angles, A1, Z1, A2, Z2, E_COM, 2)
+    xlabel = 'Scattering angle (°)'
+    ylabel = 'Cross-section (mb/sr)'
+    #plot(angles, [au_yaxis, c_yaxis], ['r--','k--'], ['Gold','Carbon'], xlabel, ylabel)
+    #plot(angles, [spin0_yaxis, spin1_yaxis, spin2_yaxis], ['k-','b--','r:'], ['I=0','I=1','I=2'], xlabel, ylabel)
 
-#xlabel = 'Scattering angle (°)'
-#ylabel = 'Cross-section (mb/sr)'
-#plot(angles, [au_yaxis, c_yaxis], ['r--','k--'], ['Gold','Carbon'], xlabel, ylabel)
-#plot(angles, [spin0_yaxis, spin1_yaxis, spin2_yaxis], ['k-','b--','r:'], ['I=0','I=1','I=2'], xlabel, ylabel)
-
+    data_file = "calibration_data.asc" #name of the file containing the calibration data
+    threshold = 15 #the threshold to filter data
+    convert, mean_qd, r2 = calb.calibrate(data_file, threshold)
 

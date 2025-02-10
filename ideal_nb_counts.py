@@ -10,10 +10,10 @@ duration = 1000. #acquisition time in seconds
 particle_nb = duration * 30. * 6.25e9 #number of incident particles
 au_target_density = 0.8 * 6.022e23 / 197. #gold target density in SI units
 c_target_density = 0.1 * 6.022e23 / 12. #carbon target density in SI units
-E_COM = 4. #center-of-mass energy in MeV
+E_beam = 3. #lab frame energy in MeV
 
-au_det_energy, au_nb_counts = cs.number_of_counts(detector_angle, det_solid_angle, particle_nb, au_target_density, 12, 6, 197, 79, E_COM)
-c_det_energy, c_nb_counts = cs.number_of_counts(detector_angle, det_solid_angle, particle_nb, c_target_density, 12, 6, 12, 6, E_COM)
+au_det_energy, au_nb_counts = cs.number_of_counts(detector_angle, det_solid_angle, particle_nb, au_target_density, 1, 1, 197, 79, E_beam)
+c_det_energy, c_nb_counts = cs.number_of_counts(detector_angle, det_solid_angle, particle_nb, c_target_density, 1, 1, 12, 6, E_beam)
 
 xlabel = 'Energy (MeV)'
 ylabel = 'Number of counts'
@@ -27,7 +27,7 @@ plt.rcParams.update({
     "grid.linestyle":"--",    # Grid formed by dashed lines
     "text.usetex": True       # Using LaTex style for text and equation
 })
-fig, ( fig1 ) = plt.subplots( figsize=(8, 6) )
+fig, fig1 = plt.subplots( figsize=(8, 6) )
 fig1.scatter(au_det_energy, au_nb_counts, marker='o', color='red', label='Gold')
 fig1.scatter(c_det_energy, c_nb_counts, marker='o', color='green', label='Carbon')
 fig1.set_xlabel(xlabel, fontsize=23)
@@ -35,5 +35,5 @@ fig1.set_ylabel(ylabel, fontsize=23)
 fig1.set_yscale('log')
 fig1.legend(loc='best')
 plt.tight_layout()
-#plt.show()
-#plt.savefig('ideal_nb_counts.pdf')
+plt.show()
+#plt.savefig('Ideal_nb_counts.pdf')
