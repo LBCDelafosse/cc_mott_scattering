@@ -1,0 +1,348 @@
+|--------------------------------------------------------------------------|
+|		Stella card n°0122 - Run started on Mon Nov 13 15:20:31 CET 2023		     |
+|--------------------------------------------------------------------------|
+				Card type:FC7_STELLA_CTA
+
+	Datafiles----------------------------------------------
+
+		Energy histogram, ascii format, channel 1: C:\EX2\2023\Exp\Beam11_140Deg_PosB\Card0122_histo_V1.asc
+		Energy histogram, ascii format, channel 2: C:\EX2\2023\Exp\Beam11_140Deg_PosB\Card0122_histo_V2.asc
+		Energy histogram, ascii format, channel 3: C:\EX2\2023\Exp\Beam11_140Deg_PosB\Card0122_histo_V3.asc
+		Energy histogram, ascii format, channel 4: C:\EX2\2023\Exp\Beam11_140Deg_PosB\Card0122_histo_V4.asc
+		Energy histogram, ascii format, channel 5: C:\EX2\2023\Exp\Beam11_140Deg_PosB\Card0122_histo_V5.asc
+		Energy histogram, ascii format, channel 6: C:\EX2\2023\Exp\Beam11_140Deg_PosB\Card0122_histo_V6.asc
+		Energy histogram, ascii format, channel 7: C:\EX2\2023\Exp\Beam11_140Deg_PosB\Card0122_histo_V7.asc
+		Energy histogram, ascii format, channel 8: C:\EX2\2023\Exp\Beam11_140Deg_PosB\Card0122_histo_V8.asc
+		Energy histogram, ascii format, channel 9: C:\EX2\2023\Exp\Beam11_140Deg_PosB\Card0122_histo_V9.asc
+		Energy histogram, ascii format, channel 10: C:\EX2\2023\Exp\Beam11_140Deg_PosB\Card0122_histo_V10.asc
+		Energy histogram, ascii format, channel 11: C:\EX2\2023\Exp\Beam11_140Deg_PosB\Card0122_histo_V11.asc
+		Energy histogram, ascii format, channel 12: C:\EX2\2023\Exp\Beam11_140Deg_PosB\Card0122_histo_V12.asc
+		Energy histogram, ascii format, channel 13: C:\EX2\2023\Exp\Beam11_140Deg_PosB\Card0122_histo_V13.asc
+		Energy histogram, ascii format, channel 14: C:\EX2\2023\Exp\Beam11_140Deg_PosB\Card0122_histo_V14.asc
+		Energy histogram, ascii format, channel 15: C:\EX2\2023\Exp\Beam11_140Deg_PosB\Card0122_histo_V15.asc
+		Energy histogram, ascii format, channel 16: C:\EX2\2023\Exp\Beam11_140Deg_PosB\Card0122_histo_V16.asc
+		Energy histogram, ascii format, channel 17: C:\EX2\2023\Exp\Beam11_140Deg_PosB\Card0122_histo_V17.asc
+		Energy histogram, ascii format, channel 18: C:\EX2\2023\Exp\Beam11_140Deg_PosB\Card0122_histo_V18.asc
+		Energy histogram, ascii format, channel 19: C:\EX2\2023\Exp\Beam11_140Deg_PosB\Card0122_histo_V19.asc
+		Energy histogram, ascii format, channel 20: C:\EX2\2023\Exp\Beam11_140Deg_PosB\Card0122_histo_V20.asc
+		Energy histogram, ascii format, channel 21: C:\EX2\2023\Exp\Beam11_140Deg_PosB\Card0122_histo_V21.asc
+		Energy histogram, ascii format, channel 22: C:\EX2\2023\Exp\Beam11_140Deg_PosB\Card0122_histo_V22.asc
+		Energy histogram, ascii format, channel 23: C:\EX2\2023\Exp\Beam11_140Deg_PosB\Card0122_histo_V23.asc
+		Energy histogram, ascii format, channel 24: C:\EX2\2023\Exp\Beam11_140Deg_PosB\Card0122_histo_V24.asc
+
+		Channel number special bits
+			Bitmask: 6(Property)/ null(AcqData)
+			Bitvalues: 0(Property)/ null(AcqData)
+		First events file : C:\EX2\2023\Exp\Beam11_140Deg_PosB\Card0122.evt
+
+
+	Acquisition mode------------------------------------------------
+
+		ENERGY HISTOGRAM (MULTIPARAMETRIC)
+
+
+
+	Clock generator AD951
+
+		CP_CURRENT_FOR_VCO: 0
+		FMC_POWER_DOWN: 0
+		CLK_ADC_EN: 0
+		FMC_CLK_CHAIN: 0
+		CLK_ADC_FREQ: 4
+		STATUS_CTRL_SEL: 0
+		SYNC_DATA: 0
+		CLK_ADC_DEPHASE_ALL: 0
+		CONFIG_START: 0
+		CLK_OUT_FREQ: 0
+		CLK_IN_FREQ: 0
+		DCM_PHASE: 0
+		CLK_OUT_DEPHASE: 0
+		CLK_TO_FPGA_DEPHASE: 0
+		CLK_TO_FPGA_FREQ: 0
+		CLK_ADC_DEPHASE: 0
+		CLK_TO_FPGA_DELAY: 0
+		CLK_OUT_DELAY: 0
+		CLK_OUT_FINE_DELAY: 0
+		CLK_TO_FPGA_FINE_DELAY: 0
+
+	ADC ADS62P49 x 4
+
+		ADC_EN: 
+			Channel 1: > all the converter circuit is off (total power-down) - It is a good mean to reduce the energy consumption - In this last case, forces to 0 the parameter CLK_A
+			Channel 2: > all the converter circuit is off (total power-down) - It is a good mean to reduce the energy consumption - In this last case, forces to 0 the parameter CLK_A
+			Channel 3: > all the converter circuit is off (total power-down) - It is a good mean to reduce the energy consumption - In this last case, forces to 0 the parameter CLK_A
+			Channel 4: > all the converter circuit is off (total power-down) - It is a good mean to reduce the energy consumption - In this last case, forces to 0 the parameter CLK_A
+
+		VCM: 0
+		CLK_FROM_ADC_DELAY: 0
+		CLK_FROM_ADC_DELAY_ALL: 0
+		ADC_GAIN: 
+			Channel 1: 0
+			Channel 2: 0
+			Channel 3: 0
+			Channel 4: 0
+
+		ADC_DATA: 
+			Channel 1: 0
+			Channel 2: 0
+			Channel 3: 0
+			Channel 4: 0
+
+
+	OSCILLO ACQ
+
+		Samples_After_Trigger: 1351300
+		O_Channel_Sel_SRAM1: 15
+		O_Oscillo_End_Readout: 1
+		Oscillo_Start: 0
+		Force_Trigger: 0
+		O_Channel_Sel_SRAM2: 1
+		Samples_Before_Trigger: 48
+
+	ENERGY ACQ
+
+		E_Force_Readout: 0
+		E_Acq_Mode: 1
+		E_Packet_Size: 0
+		E_Acq_Mem_Sel: 1
+		VLCR_Readout_Frequency: feature disabled
+		Trapez_Reset_Ampli_En: 0
+		Trapez_Gain_Type: 0
+
+	TRIGGER_IN - ELS or G&D
+
+		ELS_Trigger_In_IF_CH: 
+			Channel 1: 0
+			Channel 2: 0
+			Channel 3: 0
+			Channel 4: 0
+
+		Gate_Delay_Trigger_In_Edge: 0
+		ELS_Trigger_In_En: 0
+		ELS_Trigger_In_RdOutAll: 0
+		Gate_Delay_Retriggerability: 0
+
+	FLAG STATUS / READ ONLY
+
+		E_Mem1_Write_Addr: 0
+		E_Acq_Mem1_Full: 0
+		E_Acq_Mem2_Full: 0
+		O_Oscillo_Ready: 0
+		PLL_STATUS: 0
+		E_Mem2_Write_Addr: 0
+		O_Trigger_Counter_Channel_Sel_SRAM1: 0
+		O_Trigger_Counter_Channel_Sel_SRAM2: 0
+		O_Mem_Reading_Addr: 0
+		O_Timestamp_Counter: 0
+		ASCII_CHAIN_LEFT: 
+			Channel 1: 17740
+			Channel 2: 17473
+			Channel 3: 20831
+			Channel 4: 22064
+
+
+	CHANNEL
+
+		O_Data_To_Scope: 
+			Channel 1: 0
+			Channel 2: 3
+			Channel 3: 1
+			Channel 4: 2
+
+		E_Ext_Val_Sel: 
+			Channel 1: 0
+			Channel 2: 1
+			Channel 3: 7
+			Channel 4: 7
+
+		CLOCKTYPE_EXTNIM: 
+			Channel 1: 0
+			Channel 2: 3
+			Channel 3: 1
+			Channel 4: 2
+
+		E_Coincidence_Mark_En: 
+			Channel 1: Disables  marking of coincidence bit for events outside the validation window
+			Channel 2: Disables  marking of coincidence bit for events outside the validation window
+			Channel 3: Disables  marking of coincidence bit for events outside the validation window
+			Channel 4: Enables marking of coincidence bit for events outside the validation window
+
+		E_Acq_En: 
+			Channel 1: 0
+			Channel 2: 0
+			Channel 3: 0
+			Channel 4: 0
+
+		E_Pileup_Reject: 
+			Channel 1: 0
+			Channel 2: 0
+			Channel 3: 1
+			Channel 4: 1
+
+		E_ADC_OVR_Reject: 
+			Channel 1: 0
+			Channel 2: 0
+			Channel 3: 0
+			Channel 4: 1
+
+		E_Ext_Val_En: 
+			Channel 1: 0
+			Channel 2: 0
+			Channel 3: 1
+			Channel 4: 0
+
+		Kirk_Phaser: 
+			Channel 1: 0.0 ns
+			Channel 2: 32104.0 ns
+			Channel 3: 8.0 ns
+			Channel 4: 12368.0 ns
+
+		Trigger_Enable: 
+			Channel 1: disable
+			Channel 2: disable
+			Channel 3: disable
+			Channel 4: disable
+
+		Trigger_Slope: 
+			Channel 1: negative slope
+			Channel 2: positive slope (by default)
+			Channel 3: negative slope
+			Channel 4: positive slope (by default)
+
+		Trigger_Type: 
+			Channel 1: 1
+			Channel 2: 2
+			Channel 3: 5
+			Channel 4: 5
+
+		Trigger_Integ_Constant: 
+			Channel 1: 0
+			Channel 2: 7
+			Channel 3: 2
+			Channel 4: 0
+
+		Trigger_Diff_Constant: 
+			Channel 1: 0
+			Channel 2: 0
+			Channel 3: 7
+			Channel 4: 0
+
+		Trigger_Correct_Factor: 
+			Channel 1: 0
+			Channel 2: 6394
+			Channel 3: 2000
+			Channel 4: 500
+
+		Trigger_Threshold: 
+			Channel 1: 0
+			Channel 2: 250
+			Channel 3: -83
+			Channel 4: 1
+
+		Trigger_CFD_Delay: 
+			Channel 1: 8.0 ns
+			Channel 2: 8.0 ns
+			Channel 3: 16.0 ns
+			Channel 4: 176.0 ns
+
+		Trigger_CFD_Shift: 
+			Channel 1: 8.0 ns
+			Channel 2: 184.0 ns
+			Channel 3: 80.0 ns
+			Channel 4: 168.0 ns
+
+		Trigger_CFD_Gain: 
+			Channel 1: 0.5
+			Channel 2: 0.5
+			Channel 3: 0.25
+			Channel 4: 0.0625
+
+		Trapez_k: 
+			Channel 1: 0.0 ns
+			Channel 2: 45000.0 ns
+			Channel 3: 14336.0 ns
+			Channel 4: 4152.0 ns
+
+		Trapez_m: 
+			Channel 1: 2216.0 ns
+			Channel 2: 5240.0 ns
+			Channel 3: 18384.0 ns
+			Channel 4: 16000.0 ns
+
+		Trapez_Decay_M: 
+			Channel 1: 102144.0 ns
+			Channel 2: 200.0 ns
+			Channel 3: 2000.0 ns
+			Channel 4: 523624.0 ns
+
+		Trapez_Average_Shift: 
+			Channel 1: 500
+			Channel 2: 750
+			Channel 3: 150
+			Channel 4: 425
+
+		Trapez_Average_Width: 
+			Channel 1: 1
+			Channel 2: 1546
+			Channel 3: 1529
+			Channel 4: 1792
+
+		Trapez_X_factor: 
+			Channel 1: 5620
+			Channel 2: 21
+			Channel 3: 655
+			Channel 4: 6394
+
+		Trapez_Gain: 
+			Channel 1: 7
+			Channel 2: 0
+			Channel 3: 25
+			Channel 4: 250
+
+		Trapez_Baseline_Size: 
+			Channel 1: 64.0
+			Channel 2: None
+			Channel 3: None
+			Channel 4: None
+
+
+
+
+		Card n 0122 - Run stopped on Mon Nov 13 15:26:02 CET 2023
+			                             Duration=331.178 s
+			         Histogram ch1, hits: 80990 / 81062
+			         Histogram ch2, hits: 0 / 0
+			         Histogram ch3, hits: 0 / 0
+			         Histogram ch4, hits: 0 / 0
+			         Histogram ch5, hits: 0 / 0
+			         Histogram ch6, hits: 0 / 0
+			         Histogram ch7, hits: 0 / 0
+			         Histogram ch8, hits: 0 / 0
+			         Histogram ch9, hits: 0 / 0
+			         Histogram ch10, hits: 0 / 0
+			         Histogram ch11, hits: 0 / 0
+			         Histogram ch12, hits: 0 / 0
+			         Histogram ch13, hits: 0 / 0
+			         Histogram ch14, hits: 0 / 0
+			         Histogram ch15, hits: 0 / 0
+			         Histogram ch16, hits: 0 / 0
+			         Histogram ch17, hits: 0 / 0
+			         Histogram ch18, hits: 0 / 0
+			         Histogram ch19, hits: 0 / 0
+			         Histogram ch20, hits: 0 / 0
+			         Histogram ch21, hits: 0 / 0
+			         Histogram ch22, hits: 0 / 0
+			         Histogram ch23, hits: 0 / 0
+			         Histogram ch24, hits: 0 / 0
+
+
+		Channel number special bits
+			Bitmask: 6(Property)/ 6(AcqData)
+			Bitvalues: 0(Property)/ 0(AcqData)
+|----------------------------------------------------------|
+
+
+
+
+
+
