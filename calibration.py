@@ -73,7 +73,7 @@ def filter_peaks(data: np.array, threshold: int = 15):
     ----------
     data: np.array
         The data to be filtered.
-    threshold: int, optionnal
+    threshold: int, optional
         By default: 15. The number of hits above which the data is conserved.
 
     Returns
@@ -138,7 +138,7 @@ def linear_regression(nominal_bins, nominal_energies):
     model = LinearRegression()
     model.fit(nominal_bins, nominal_energies)
 
-    #pred_energies = model.predict(nominal_bins) #predict using the model
+    pred_energies = model.predict(nominal_bins) #predict using the model
     r2 = r2_score(nominal_energies, pred_energies) #calculate the R² score
 
     # retrieve the coefficients and intercept
@@ -150,18 +150,32 @@ def linear_regression(nominal_bins, nominal_energies):
 def calibrate(data_file, threshold, display=False):
     """
     Performs the calibration.
+
+    Parameters
+    ----------
+    data_file: string
+        Name of the ASCII file containing the calibration data.
+    threshold: int
+        The number of hits above which the data is conserved.
+    display: boolean, optional
+        If true, displays calibration results.
+
+    Returns
+    -------
+    tuple
+        Tuple containing: the function mapping QDC channels to energies, the minimum quadratic deviation to the nominal energy, and the R² coefficient.
     """
     # open the file and plot data
     data = open_data(data_file)
 
     # filter data and get the peaks
     nominal_bins = []
-    mean_qd = [] #mean quadratic deviation from nominal bin
-    filtered_cardstella = filter_peaks(data, THRESHOLD)
+    quadratic_deviations = [] #mean quadratic deviation from nominal bin
+    filtered_cardstella = filter_peaks(data, threshold)
     for idx_start, idx_end in ((12500, 13000), (13500, 14000), (14000, 14500)):
         nominal_bin, nb_counts, std = get_stats(filtered_cardstella[idx_start:idx_end])
         nominal_bins.append([nominal_bin])
-        mean_qd.append(std)
+        quadratic_deviations.append(std)
         if display:
             print(
                 f"bins n°{int(nominal_bin)}\n"
@@ -173,11 +187,11 @@ def calibrate(data_file, threshold, display=False):
 
     # perform the calibration
     nominal_bins = np.array(nominal_bins)
-    mean_qd = np.array(mean_qd)
-    nominal_energies = np.array([5.16, 5.486, 5.805])
+    quadratic_dev = min(quadratic_deviations)
+    nominal_energies = np.array([5.16, 5.486, 5.805]) #known energies in MeV
     convert, r2 = linear_regression(nominal_bins, nominal_energies)
     if display: print('slope =', convert(1) - convert(0),'\nintercept =', convert(0))
-    mean_qd = convert(mean_qd)
-    if display: print('uncertainty =', mean_qd)
+    quadratic_dev = convert(quadratic_dev) #convert bins into MeV
+    if display: print('uncertainty =', quadratic_dev)
 
-    return convert, mean_qd, r2
+    return convert, quadratic_dev, r2

@@ -103,14 +103,14 @@ def mott_cross_sections(angles, A1, Z1, A2, Z2, E_beam, total_spin):
 
     return cross_sections
 
-def plot(xaxis, yaxes, linetypes, labels, xlabel, ylabel):
+def plot(xaxes, yaxes, linetypes, labels, xlabel, ylabel):
     """
     Plots a graph.
 
     Parameters
     ----------
-    xaxis: numpy array
-        List of angles at which measurements are done, in radians.
+    xaxes: list of numpy arrays
+        List of arguments for the plot.
     yaxes: list of numpy arrays
         List of curves to plot.
     linetypes: list of strings
@@ -128,7 +128,6 @@ def plot(xaxis, yaxes, linetypes, labels, xlabel, ylabel):
     """
 
     nb_curves = len(yaxes)
-    xaxis *= 180/np.pi #conversion in degrees
     plt.rcParams.update({
         "font.family": "serif",   # Type of font
         "xtick.labelsize": "20",  # Size of the xtick label
@@ -143,7 +142,7 @@ def plot(xaxis, yaxes, linetypes, labels, xlabel, ylabel):
     fig, ( fig1 ) = plt.subplots( figsize=(8, 6) )
     
     for index in range(nb_curves):
-        fig1.plot(xaxis, yaxes[index], linetypes[index], label=labels[index])
+        fig1.plot(xaxes[index], yaxes[index], linetypes[index], label=labels[index])
 
     fig1.set_xlabel(xlabel, fontsize=23)
     fig1.set_ylabel(ylabel, fontsize=23)
@@ -154,7 +153,7 @@ def plot(xaxis, yaxes, linetypes, labels, xlabel, ylabel):
     plt.show()
     #plt.savefig('fig.pdf')
 
-def number_of_counts(detector_angle, det_solid_angle, particle_nb, target_density, A1, Z1, A2, Z2, E_COM):
+def number_of_counts(detector_angle, det_solid_angle, particle_nb, target_density, A1, Z1, A2, Z2, E_COM, display=False):
     """
     Computes the theoretical number of counts for the detected energy (Rutherford scattering).
 
@@ -178,6 +177,8 @@ def number_of_counts(detector_angle, det_solid_angle, particle_nb, target_densit
         Charge number of the target particle.
     E_COM: float
         Center-of-mass energy in MeV.
+    display: boolean
+        If True, displays a number of calculation results.
 
     Returns
     -------
@@ -187,27 +188,28 @@ def number_of_counts(detector_angle, det_solid_angle, particle_nb, target_densit
         Number of counts.
     """
     gamma = A1/A2
-    conversion_numerator = gamma * np.cos(detector_angle) + np.sqrt(1. - gamma**2*np.sin(detector_angle)**2)
+    conversion_numerator = gamma * np.cos(detector_angle) - np.sqrt(1. - gamma**2*np.sin(detector_angle)**2)
     det_energy = A1**2 * E_COM / (A2*(A1+A2)) * conversion_numerator**2 / gamma**2 #detected energy
     theta_COM = np.arcsin( np.sin(detector_angle) * conversion_numerator ) #angle in the center-of-mass frame
-    print(theta_COM * 180 / np.pi, '°')
-    [cross_section_COM] = rutherford_cross_sections([theta_COM], A1, Z1, A2, Z2, E_COM)
-    print('cross-section COM =', cross_section_COM, 'mb')
-    cross_section = cross_section_COM * conversion_numerator / np.sqrt(1. - gamma**2 * np.sin(detector_angle)**2) #take the cross-section to the lab frame, in mb
-    print('cross-section =', cross_section, 'mb')
+    if display: print(theta_COM * 180 / np.pi, '°')
+    E_beam = E_COM * (A1+A2) / A2 #lab frame beam energy
+    [cross_section_COM] = rutherford_cross_sections([theta_COM], A1, Z1, A2, Z2, E_beam)
+    if display: print('cross-section COM =', cross_section_COM, 'mb/sr')
+    cross_section = cross_section_COM * conversion_numerator**2 / np.sqrt(1. - gamma**2 * np.sin(detector_angle)**2) #take the cross-section to the lab frame, in mb
+    if display: print('cross-section =', cross_section, 'mb/sr')
     nb_counts = det_solid_angle * cross_section * 10**(-31) * particle_nb * target_density
-    print('det_energy =', det_energy, 'MeV, nb_counts =', nb_counts)
+    if display: print('det_energy =', det_energy, 'MeV, nb_counts =', nb_counts)
     return det_energy, nb_counts
 
-if __name__ == "main":
+if __name__ == "__main__":
     theta_start = 5 * np.pi/180 #initial angle for plot in radians
     theta_stop = 175* np.pi/180 #final angle for plot in radians
     angles = np.linspace(theta_start, theta_stop, 10000)
     E_beam = 3. #lab frame energy of the beam particles
 
-    A1,Z1,A2,Z2 = 12,6,12,6 #collision on carbon
+    A1,Z1,A2,Z2 = 1,1,12,6 #collision on carbon
     c_yaxis = rutherford_cross_sections(angles, A1, Z1, A2, Z2, E_beam)
-    A1,Z1,A2,Z2 = 12,6,197,79 #collision on gold
+    A1,Z1,A2,Z2 = 1,1,197,79 #collision on gold
     au_yaxis = rutherford_cross_sections(angles, A1, Z1, A2, Z2, E_beam)
 
     #spin0_yaxis = mott_cross_sections(angles, A1, Z1, A2, Z2, E_beam, 0)
@@ -216,10 +218,8 @@ if __name__ == "main":
 
     xlabel = 'Scattering angle (°)'
     ylabel = 'Cross-section (mb/sr)'
-    #plot(angles, [au_yaxis, c_yaxis], ['r--','k--'], ['Gold','Carbon'], xlabel, ylabel)
-    #plot(angles, [spin0_yaxis, spin1_yaxis, spin2_yaxis], ['k-','b--','r:'], ['I=0','I=1','I=2'], xlabel, ylabel)
+    angles *= 180/np.pi #conversion in degrees
+    plot([angles for _ in range(2)], [au_yaxis, c_yaxis], ['r--','k--'], ['Gold','Carbon'], xlabel, ylabel)
+    #plot([angles for _ in range(3)], [spin0_yaxis, spin1_yaxis, spin2_yaxis], ['k-','b--','r:'], ['I=0','I=1','I=2'], xlabel, ylabel)
 
-    data_file = "calibration_data.asc" #name of the file containing the calibration data
-    threshold = 15 #the threshold to filter data
-    convert, mean_qd, r2 = calb.calibrate(data_file, threshold)
 
