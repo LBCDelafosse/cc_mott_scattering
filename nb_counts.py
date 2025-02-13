@@ -1,6 +1,6 @@
+import matplotlib.pyplot as plt
 import numpy as np
 import scipy.constants as cst
-import matplotlib.pyplot as plt
 import cross_sections as cs
 import calibration as calb
 
