@@ -3,20 +3,9 @@ import scipy.constants as cst
 import matplotlib.pyplot as plt
 from sklearn.linear_model import LinearRegression
 from sklearn.metrics import r2_score
-import calibration as calb
+from collision import *
+import data_extraction as dt
 
-
-def sec(x):
-    """
-    Computes the trigonometric secant function.
-    """
-    return 1./np.cos(x)
-
-def cosec(x):
-    """
-    Computes the trigonometric cosecant function.
-    """
-    return 1./np.sin(x)
 
 def rutherford_cross_sections(angles, A1, Z1, A2, Z2, E_beam):
     """
@@ -103,7 +92,7 @@ def mott_cross_sections(angles, A1, Z1, A2, Z2, E_beam, total_spin):
 
     return cross_sections
 
-def plot(xaxes, yaxes, linetypes, labels, xlabel, ylabel):
+def plot(xaxes, yaxes, linetypes, labels, xlabel, ylabel, log=False, show=True, figname=None):
     """
     Plots a graph.
 
@@ -121,6 +110,8 @@ def plot(xaxes, yaxes, linetypes, labels, xlabel, ylabel):
         Label of the x axis.
     ylabel: string
         Label of the y axis.
+    log:boolean, optional
+        Default: False. If true, uses a logarithmic scale for the y-axis.
 
     Returns
     -------
@@ -146,12 +137,12 @@ def plot(xaxes, yaxes, linetypes, labels, xlabel, ylabel):
 
     fig1.set_xlabel(xlabel, fontsize=23)
     fig1.set_ylabel(ylabel, fontsize=23)
-    fig1.set_yscale('log')
+    if log: fig1.set_yscale('log')
     fig1.legend(loc='best')
     
     plt.tight_layout()
-    plt.show()
-    #plt.savefig('fig.pdf')
+    if show: plt.show()
+    if figname != None: plt.savefig(figname)
 
 def number_of_counts(detector_angle, det_solid_angle, particle_nb, target_density, A1, Z1, A2, Z2, E_COM, display=False):
     """
@@ -207,10 +198,12 @@ if __name__ == "__main__":
     angles = np.linspace(theta_start, theta_stop, 10000)
     E_beam = 3. #lab frame energy of the beam particles
 
-    A1,Z1,A2,Z2 = 1,1,12,6 #collision on carbon
-    c_yaxis = rutherford_cross_sections(angles, A1, Z1, A2, Z2, E_beam)
+    #A1,Z1,A2,Z2 = 1,1,12,6 #collision on carbon
+    #c_yaxis = rutherford_cross_sections(angles, A1, Z1, A2, Z2, E_beam)
     A1,Z1,A2,Z2 = 1,1,197,79 #collision on gold
-    au_yaxis = rutherford_cross_sections(angles, A1, Z1, A2, Z2, E_beam)
+    #au_yaxis = rutherford_cross_sections(angles, A1, Z1, A2, Z2, E_beam)
+    [value] = rutherford_cross_sections([2*np.pi/3], A1, Z1, A2, Z2, E_beam)
+    print('value =', value)
 
     #spin0_yaxis = mott_cross_sections(angles, A1, Z1, A2, Z2, E_beam, 0)
     #spin1_yaxis = mott_cross_sections(angles, A1, Z1, A2, Z2, E_beam, 1)
@@ -219,7 +212,7 @@ if __name__ == "__main__":
     xlabel = 'Scattering angle (°)'
     ylabel = 'Cross-section (mb/sr)'
     angles *= 180/np.pi #conversion in degrees
-    plot([angles for _ in range(2)], [au_yaxis, c_yaxis], ['r--','k--'], ['Gold','Carbon'], xlabel, ylabel)
-    #plot([angles for _ in range(3)], [spin0_yaxis, spin1_yaxis, spin2_yaxis], ['k-','b--','r:'], ['I=0','I=1','I=2'], xlabel, ylabel)
+    #plot([angles for _ in range(2)], [au_yaxis, c_yaxis], ['r--','k--'], ['Gold','Carbon'], xlabel, ylabel, log=True)
+    #plot([angles for _ in range(3)], [spin0_yaxis, spin1_yaxis, spin2_yaxis], ['k-','b--','r:'], ['I=0','I=1','I=2'], xlabel, ylabel, log=True)
 
 

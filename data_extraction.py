@@ -5,6 +5,7 @@ import numpy as np
 import scipy.constants as cst
 from sklearn.linear_model import LinearRegression
 from sklearn.metrics import r2_score
+from scipy.optimize import curve_fit
 
 
 # figure setup
@@ -84,8 +85,9 @@ def filter_peaks(data: np.array, threshold: int = 15):
     """
     filtered_data = data.copy()
 
-    filter_array = np.where(data[:, 1] > threshold, 1, 0)
-    filtered_data[:, 1] = filtered_data[:, 1] * filter_array
+    if threshold:
+        filter_array = np.where(data[:, 1] > threshold, 1, 0)
+        filtered_data[:, 1] = filtered_data[:, 1] * filter_array
     return filtered_data
 
 def get_stats(data: np.array):
@@ -197,14 +199,18 @@ def calibrate(data_file, threshold=None, display=False, plot=False):
 
     return convert, quadratic_dev, r2
 
-def experimental_cross_section(data_file, det_solid_angle, target_density, threshold=None, display=False, plot=False):
+def experimental_cross_section(data, nb_counts, nb_faraday, det_solid_angle, target_density, threshold=None, display=False, plot=False):
     """
     Computes experimental cross-sections.
 
     Parameters
     ----------
-    data_file: string
-        Name of the ASCII file containing the calibration data.
+    data: numpy array
+        Calibration data.        
+    nb_counts: int
+        Number of counts in the detector corresponding to scattered nuclei.
+    nb_faraday: int
+        Number of counts in the Faraday cups.
     det_solid_angle: float
         Solid angle occupied by the detector in the lab frame, in steradians.
     target_density: float
@@ -219,16 +225,51 @@ def experimental_cross_section(data_file, det_solid_angle, target_density, thres
     Returns
     -------
     float
-        Experimental differential cross-section.
+        Experimental differential cross-section in mb/sr.
     """
-    data = open_data(data_file) #"Exp/Beam2_90Deg_PosA/CardStella_0122_histo_V1.asc"
     if plot: plot_data(data) #plot the data
-    nb_counts = np.sum(data[:, 1]) #total number of counts in the detector
-    if display: print(nb_counts)
-    #extract number of faraday counts !!!!!!!
     nb_particles = nb_faraday * 2e-9 / cst.e #number of particles in the incident beam
     if display: print(nb_particles)
-    cross_section = nb_counts / (nb_particles * target_density * det_solid_angle) #experimental differential cross-section
+    cross_section = nb_counts / (nb_particles * target_density * det_solid_angle) * 1e31 #experimental differential cross-section in mb/sr.
 
     return cross_section
+
+def fit_function(x, mean, std_dev, amplitude, slope, intercept):
+    return amplitude * np.exp(-0.5 * ((x - mean) / std_dev) ** 2) + slope * x + intercept
+
+def fit(data, data_start, data_end, mean, std_dev, amplitude, slope, intercept):
+    initial_guess = [mean, std_dev, amplitude, slope, intercept] #initial guess for the parameters
+    params, covariance = curve_fit(fit_function, data[data_start:data_end, 0], data[data_start:data_end, 1], p0=initial_guess) #fit the Gaussian function to the histogram data
+    fitted_mean, fitted_std_dev, fitted_amplitude, fitted_slope, fitted_intercept = params
+
+    return fitted_mean, fitted_std_dev, fitted_amplitude, fitted_slope, fitted_intercept, covariance
+
+if __name__ == "__main__":
+    data_file = "Exp/Beam2_90Deg_PosA/CardStella_0122_histo_V1.asc"
+    det_solid_angle = 2*np.pi * (1. - 1. / np.sqrt(1. + (0.5/123.)**2)) #solid angle occupied by the detector
+    target_density = 0.8 * 6.022e23 / 197. #gold target density in SI units
+    nb_faraday = 10149
+    data = open_data(data_file)
+    #plot_data(data)
+
+    fitted_mean, fitted_std_dev, fitted_amplitude, fitted_slope, fitted_intercept, covariance = fit(data, 6593, 10000, 7.2e3, 50., 50., 0., 2.)
+    print(fitted_mean, fitted_std_dev, fitted_amplitude, fitted_slope, fitted_intercept, covariance)
+    nb_counts = fitted_amplitude * fitted_std_dev * np.sqrt(np.pi) #number of scattered nuclei in the detector
+    print(nb_counts)
+    y_fit = fit_function(data[:, 0], fitted_mean, fitted_std_dev, fitted_amplitude, fitted_slope, fitted_intercept)
+    cross_section = experimental_cross_section(data, nb_counts, nb_faraday, det_solid_angle, target_density, threshold=None, display=False)
+    print(cross_section)
+
+'''
+    plt.plot(data[:, 0], data[:,1], color='C0')
+    plt.plot(data[:, 0], y_fit, 'r-', label='Fitted Curve')
+
+    # Add labels and legend
+    plt.xlabel('Bins')
+    plt.ylabel('Number of counts')
+    plt.legend()
+
+    # Show the plot
+    plt.show()
+'''
 
