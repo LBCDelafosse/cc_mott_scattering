@@ -25,12 +25,12 @@ def open_data(filename: str):
 
     Parameters
     ----------
-    filename: str
+    filename: string
         The name of the file to open.
 
     Returns
     -------
-    np.array
+    numpy array
         The data extracted.
     """
     with open(filename, "r", encoding="ascii") as file:
@@ -73,7 +73,7 @@ def filter_peaks(data: np.array, threshold: int = 15):
 
     Parameters
     ----------
-    data: np.array
+    data: numpy array
         The data to be filtered.
     threshold: int, optional
         By default: 15. The number of hits above which the data is conserved.
@@ -96,7 +96,7 @@ def get_stats(data: np.array):
 
     Parameters
     ----------
-    data: np.array
+    data: numpy array
         The data to be analyzed.
 
     Returns
@@ -260,7 +260,6 @@ if __name__ == "__main__":
     cross_section = experimental_cross_section(data, nb_counts, nb_faraday, det_solid_angle, target_density, threshold=None, display=False)
     print(cross_section)
 
-'''
     plt.plot(data[:, 0], data[:,1], color='C0')
     plt.plot(data[:, 0], y_fit, 'r-', label='Fitted Curve')
 
@@ -271,5 +270,5 @@ if __name__ == "__main__":
 
     # Show the plot
     plt.show()
-'''
+
 

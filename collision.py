@@ -45,10 +45,6 @@ def plot(xaxes, yaxes, linetypes, labels, xlabel, ylabel, log=False, show=True, 
         Label of the y axis.
     log:boolean, optional
         Default: False. If true, uses a logarithmic scale for the y-axis.
-
-    Returns
-    -------
-    Nothing.
     """
 
     nb_curves = len(yaxes)
@@ -211,9 +207,14 @@ class Collision:
 
     # Other methods
 
-    def compute_mass_and_velocity(self):
+    def compute_mass_and_velocity(self, display=False):
         """
         Compute the reduced mass and the initial velocity of the incident particles in the lab frame.
+
+        Parameters
+        ----------
+        display: boolean, optional
+            Default: False. If True, displays the result of the computation.
 
         Returns
         -------
@@ -222,27 +223,46 @@ class Collision:
         """
         reduced_mass = cst.m_n * self.A1 * self.A2 / (self.A1 + self.A2)
         initial_velocity = np.sqrt(self.E_beam * 1e6 * cst.e * 2 / (self.A1 * cst.m_n))
+        if display:
+            print('reduced mass   =   ', reduced_mass)
+            print('initial_velocity = ', initial_velocity)
         return reduced_mass, initial_velocity
 
-    def _compute_conversion_constants(self, sign):
+    def _compute_conversion_constants(self, sign, display=False):
+        """
+        Private method. Compute some useful constants for converting physical quantities between the lab and centre-of-mass frames.
+        """
         gamma = self.A1 / self.A2
         conversion_constant = gamma * np.cos(self.detector_angle) + sign * np.sqrt(1. - gamma**2 * np.sin(self.detector_angle)**2)
+        if display: print(gamma, conversion_constant)
         return gamma, conversion_constant
 
-    def compute_E_COM(self):
+    def compute_E_COM(self, display=False):
         """
         Compute the total system's energy in the centre-of-mass frame.
+
+        Parameters
+        ----------
+        display: boolean, optional
+            Default: False. If True, displays the result of the computation.
 
         Returns
         -------
         float
             Energy of the total system in the centre-of-mass frame, in MeV.
         """
-        return E_beam * self.A2 / (self.A1 + self.A2)
+        E_COM = E_beam * self.A2 / (self.A1 + self.A2)
+        if display: print(E_COM)
+        return E_COM
 
-    def compute_COM_angle(self):
+    def compute_COM_angle(self, display=False):
         """
         Compute the detector angle in the COM frame.
+
+        Parameters
+        ----------
+        display: boolean, optional
+            Default: False. If True, displays the result of the computation.
 
         Returns
         -------
@@ -253,11 +273,17 @@ class Collision:
         COM_angle = np.arcsin( np.sin(self.detector_angle) * conversion_constant )
         if self.detector_angle > np.pi/2:
             COM_angle = np.pi - COM_angle
+        if display: print(COM_angle)
         return COM_angle
 
-    def compute_detected_energy(self):
+    def compute_detected_energy(self, display=False):
         """
         Compute the energy deposited by each scattered particle in the detector.
+
+        Parameters
+        ----------
+        display: boolean, optional
+            Default: False. If True, displays the result of the computation.
 
         Returns
         -------
@@ -265,11 +291,18 @@ class Collision:
             Detector angle in the COM frame, in radians.
         """
         gamma, conversion_constant = self._compute_conversion_constants(-1)
-        return self.A1**2 * E_beam / (self.A1 + self.A2)**2 * conversion_constant**2 / gamma**2
+        detected_energy = self.A1**2 * E_beam / (self.A1 + self.A2)**2 * conversion_constant**2 / gamma**2
+        if display: print(detected_energy)
+        return detected_energy
 
-    def compute_rutherford_cross_section(self):
+    def compute_rutherford_cross_section(self, display=False):
         """
         Compute theoretical Rutherford cross-section for a given collision.
+
+        Parameters
+        ----------
+        display: boolean, optional
+            Default: False. If True, displays the result of the computation.
 
         Returns
         -------
@@ -277,11 +310,18 @@ class Collision:
             Theoretical Rutherford cross-section in the centre-of-mass frame, in mb/sr.
         """
         COM_angle = self.compute_COM_angle()
-        return self.__n**2 / (4. * self.__k**2) * cosec(COM_angle/2.)**4 * 1e31
+        cross_section = self.__n**2 / (4. * self.__k**2) * cosec(COM_angle/2.)**4 * 1e31
+        if display: print(cross_section)
+        return cross_section
 
-    def compute_mott_cross_section(self):
+    def compute_mott_cross_section(self, display=False):
         """
         Compute theoretical Mott cross-section for a given collision.
+
+        Parameters
+        ----------
+        display: boolean, optional
+            Default: False. If True, displays the result of the computation.
 
         Returns
         -------
@@ -289,11 +329,18 @@ class Collision:
             Theoretical Mott cross-section in the centre-of-mass, in mb/sr.
         """
         COM_angle = self.compute_COM_angle()
-        return self.__n**2 / (4. * self.__k**2) * ( cosec(COM_angle/2.)**4 + sec(COM_angle/2.)**4 + 2*(-1)**(2*self.total_spin)/(2*self.total_spin+1) * np.cos(self.__n * np.log(np.tan(COM_angle/2.)**2)) * cosec(COM_angle/2.)**2 * sec(COM_angle/2.)**2 ) * 1e31
+        cross_section = self.__n**2 / (4. * self.__k**2) * ( cosec(COM_angle/2.)**4 + sec(COM_angle/2.)**4 + 2*(-1)**(2*self.total_spin)/(2*self.total_spin+1) * np.cos(self.__n * np.log(np.tan(COM_angle/2.)**2)) * cosec(COM_angle/2.)**2 * sec(COM_angle/2.)**2 ) * 1e31
+        if display: print(cross_section)
+        return cross_section
 
     def compute_number_of_counts(self, display=False):
         """
         Compute the theoretical number of counts for the detected energy (Rutherford scattering).
+
+        Parameters
+        ----------
+        display: boolean, optional
+            Default: False. If True, displays the result of the computation.
 
         Returns
         -------
@@ -302,37 +349,30 @@ class Collision:
         """
         gamma, conversion_constant = self._compute_conversion_constants(-1)
 
-        detected_energy = self.A1**2 * self.E_beam / (self.A1 + self.A2)**2 * conversion_constant**2 / gamma**2 #energy deposited by each 
-        cross_section = self.compute_rutherford_cross_section() * conversion_numerator**2 / np.sqrt(1. - gamma**2 * np.sin(self.detector_angle)**2) #take the cross-section to the lab frame, in mb/sr
+        detected_energy = self.A1**2 * self.E_beam / (self.A1 + self.A2)**2 * conversion_constant**2 / gamma**2 #energy deposited by each particle in the detector
+        cross_section = self.compute_rutherford_cross_section() * conversion_constant**2 / np.sqrt(1. - gamma**2 * np.sin(self.detector_angle)**2) #take the cross-section to the lab frame, in mb/sr
+        print(self.detector_solid_angle, self.nb_particles, self.target_density)
         nb_counts = self.detector_solid_angle * cross_section * 1e-31 * self.nb_particles * self.target_density
 
         if display:
-            print('det_energy =    ', detected_energy, 'MeV')
-            print('cross-section = ', cross_section, 'mb/sr')
-            print('nb_counts =     ', nb_counts)
+            print('detected energy = ', detected_energy, 'MeV')
+            print('cross-section  =  ', cross_section, 'mb/sr')
+            print('nb of counts  =   ', nb_counts)
 
         return detected_energy, nb_counts
 
 
 if __name__ == "__main__":
-    theta_start = 5 * np.pi/180 #initial angle for plot in radians
-    theta_stop = 175* np.pi/180 #final angle for plot in radians
-    angles = np.linspace(theta_start, theta_stop, 10000)
-    E_beam = 3. #lab frame energy of the beam particles
-
-    A1,Z1,A2,Z2 = 1,1,197,79 #collision on gold
-
-    cross_sections = []
-
-    for angle in angles:
-        au_collision = Collision(0, 0, Z1, A1, Z2, A2, E_beam)
-        au_collision.set_detector_angle_from_COM_angle(angle)
-        cross_sections.append(au_collision.compute_rutherford_cross_section())
-
-    xlabel = 'Scattering angle (°)'
-    ylabel = 'Cross-section (mb/sr)'
-    angles *= 180/np.pi #conversion in degrees
-    plot([angles], [cross_sections], ['r-'], ['Gold'], xlabel, ylabel, log=True)
+    det_solid_angle = 2*np.pi * (1. - 1. / np.sqrt(1. + (0.5/130.)**2)) #solid angle occupied by the detector
+    Z1,A1,Z2,A2 = 1,1,79,197 #collision on gold
+    faraday_count = 10149
+    au_mass_density = 80. #surface density in µg/cm²
+    c_mass_density = 10. #surface density in µg/cm²
+    au_collision = Collision(np.pi/2, det_solid_angle, Z1, A1, Z2, A2, 3.)
+    au_collision.set_nb_particles_from_faraday(faraday_count)
+    au_collision.set_target_density_from_mass_density(au_mass_density)
+    au_collision.compute_rutherford_cross_section(display=False)
+    au_collision.compute_number_of_counts(display=True)
 
 
 
