@@ -18,61 +18,6 @@ def cosec(x):
     """
     return 1./np.sin(x)
 
-def reciprocal_sin(x):
-    """
-    Compute the reciprocal sine.
-    """
-    floor = int(x/np.pi + 0.5)
-    return floor
-
-def plot(xaxes, yaxes, linetypes, labels, xlabel, ylabel, log=False, show=True, figname=None):
-    """
-    Plot a graph.
-
-    Parameters
-    ----------
-    xaxes: list of numpy arrays
-        List of arguments for the plot.
-    yaxes: list of numpy arrays
-        List of curves to plot.
-    linetypes: list of strings
-        List of instructions indicating the type of curve to plot.
-    labels: list of strings
-        List of the labels for each curve to plot.
-    xlabel: string
-        Label of the x axis.
-    ylabel: string
-        Label of the y axis.
-    log:boolean, optional
-        Default: False. If true, uses a logarithmic scale for the y-axis.
-    """
-
-    nb_curves = len(yaxes)
-    plt.rcParams.update({
-        "font.family": "serif",   # Type of font
-        "xtick.labelsize": "20",  # Size of the xtick label
-        "ytick.labelsize": "20",  # Size of the ytick label
-        "lines.linewidth": "3",   # Width of the curves
-        "legend.framealpha": "1", # Transparency of the legend frame
-        "legend.fontsize": "23",  # Size of the legend
-        "grid.linestyle":"--",    # Grid formed by dashed lines
-        "text.usetex": True       # Using LaTex style for text and equation
-    })
-    
-    fig, ( fig1 ) = plt.subplots( figsize=(8, 6) )
-    
-    for index in range(nb_curves):
-        fig1.plot(xaxes[index], yaxes[index], linetypes[index], label=labels[index])
-
-    fig1.set_xlabel(xlabel, fontsize=23)
-    fig1.set_ylabel(ylabel, fontsize=23)
-    if log: fig1.set_yscale('log')
-    fig1.legend(loc='best')
-    
-    plt.tight_layout()
-    if show: plt.show()
-    if figname != None: plt.savefig(figname)
-
 class Collision:
     """
     Object containing the parameters of an elastic collision in a collision experiment.
@@ -80,9 +25,9 @@ class Collision:
 
     # Constructors
 
-    def __init__(self, detector_angle, detector_solid_angle, Z1, A1, Z2, A2, E_beam, nb_particles=0, target_density=0., total_spin=0.):
+    def __init__(self, detector_angle, detector_solid_angle, Z1, A1, Z2, A2, E_beam, nb_particles=0, target_density=0.):
         """
-        Constructor of the Collision class.
+        Default constructor of the Collision class.
 
         Parameters
         ----------
@@ -104,8 +49,6 @@ class Collision:
             Default: 0. Number of particles in the incident beam.
         target_density: float, optional
             Default: 0. Number of scattering centres per squared meter.
-        total_spin: float, optional
-            Default: 0. Total spin of the target/beam atom when they are indistinguishable.
         """
         self.detector_angle = detector_angle
         self.detector_solid_angle = detector_solid_angle
@@ -116,7 +59,6 @@ class Collision:
         self.E_beam = E_beam
         self.nb_particles = nb_particles
         self.target_density = target_density
-        self.total_spin = total_spin
         reduced_mass = cst.m_n * self.A1 * self.A2 / (self.A1 + self.A2)
         initial_velocity = np.sqrt(self.E_beam * 1e6 * cst.e * 2 / (self.A1 * cst.m_n))
         self.__k = reduced_mass * initial_velocity / cst.hbar
@@ -147,6 +89,19 @@ class Collision:
     # Modifiers
 
     def set_detector_angle_from_COM_angle(self, COM_angle):
+        """
+        Set the instance attribute detector_angle from the centre-of-mass angle.
+
+        Parameters
+        ----------
+        COM_angle: float
+            Detector angle in the centre-of-mass frame in radians.
+
+        Returns
+        -------
+        float
+            Detector angle in the lab frame in radians.
+        """
         gamma, conversion_constant = self._compute_conversion_constants(-1)
         self.detector_angle = np.arctan( np.sin(COM_angle) / (np.cos(COM_angle) + gamma) )
         if self.detector_angle < 0: self.detector_angle += np.pi
@@ -314,12 +269,14 @@ class Collision:
         if display: print(cross_section)
         return cross_section
 
-    def compute_mott_cross_section(self, display=False):
+    def compute_mott_cross_section(self, total_spin: float, display=False):
         """
         Compute theoretical Mott cross-section for a given collision.
 
         Parameters
         ----------
+        total_spin: float
+            Total spin of the target/beam atom when they are indistinguishable.
         display: boolean, optional
             Default: False. If True, displays the result of the computation.
 
@@ -361,8 +318,8 @@ class Collision:
 
         return detected_energy, nb_counts
 
-
 if __name__ == "__main__":
+    print('Test script')
     det_solid_angle = 2*np.pi * (1. - 1. / np.sqrt(1. + (0.5/130.)**2)) #solid angle occupied by the detector
     Z1,A1,Z2,A2 = 1,1,79,197 #collision on gold
     faraday_count = 10149
