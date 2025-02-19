@@ -264,7 +264,7 @@ class Collision:
         float
             Theoretical Rutherford cross-section in the centre-of-mass frame, in mb/sr.
         """
-        COM_angle = self.compute_COM_angle()
+        COM_angle = self.compute_COM_angle(display=display)
         cross_section = self.__n**2 / (4. * self.__k**2) * cosec(COM_angle/2.)**4 * 1e31
         if display: print(cross_section)
         return cross_section
@@ -285,8 +285,8 @@ class Collision:
         float
             Theoretical Mott cross-section in the centre-of-mass, in mb/sr.
         """
-        COM_angle = self.compute_COM_angle()
-        cross_section = self.__n**2 / (4. * self.__k**2) * ( cosec(COM_angle/2.)**4 + sec(COM_angle/2.)**4 + 2*(-1)**(2*self.total_spin)/(2*self.total_spin+1) * np.cos(self.__n * np.log(np.tan(COM_angle/2.)**2)) * cosec(COM_angle/2.)**2 * sec(COM_angle/2.)**2 ) * 1e31
+        COM_angle = self.compute_COM_angle(display=display)
+        cross_section = self.__n**2 / (4. * self.__k**2) * ( cosec(COM_angle/2.)**4 + sec(COM_angle/2.)**4 + 2*(-1)**(2*total_spin)/(2*total_spin+1) * np.cos(self.__n * np.log(np.tan(COM_angle/2.)**2)) * cosec(COM_angle/2.)**2 * sec(COM_angle/2.)**2 ) * 1e31
         if display: print(cross_section)
         return cross_section
 
@@ -308,7 +308,7 @@ class Collision:
 
         detected_energy = self.A1**2 * self.E_beam / (self.A1 + self.A2)**2 * conversion_constant**2 / gamma**2 #energy deposited by each particle in the detector
         cross_section = self.compute_rutherford_cross_section() * conversion_constant**2 / np.sqrt(1. - gamma**2 * np.sin(self.detector_angle)**2) #take the cross-section to the lab frame, in mb/sr
-        print(self.detector_solid_angle, self.nb_particles, self.target_density)
+        if display: print(self.detector_solid_angle, self.nb_particles, self.target_density)
         nb_counts = self.detector_solid_angle * cross_section * 1e-31 * self.nb_particles * self.target_density
 
         if display:

@@ -127,7 +127,7 @@ class Data:
         assert self.threshold != None, 'Error: No treshold specified for the filter_peaks method.'
         filtered_data = self.data.copy() #deep copy of the data
         if self.threshold:
-            filter_array = np.where(data[:, 1] > threshold, 1, 0)
+            filter_array = np.where(self.data[:, 1] > self.threshold, 1, 0)
             filtered_data[:, 1] = filtered_data[:, 1] * filter_array
         filtered_data = Data(filtered_data) #create a new instance for the filtered data
         return filtered_data
@@ -149,6 +149,8 @@ class Data:
             Tuple containing the bins, the number of hits and the mean quadratic deviation to the nominal bin in bin units.
         """
         nominal_bin, nb_counts = max(self.data, key=lambda x: x[1]) #get the max
+        #nominal_bin = int(nominal_bin)
+        #nb_counts = int(nb_counts)
 
         variance = 0 #initialize the square of the mean quadratic deviation (not a true variance)
         normalization_cst = 0 #initialize the normalization constant
@@ -160,14 +162,16 @@ class Data:
 
         return nominal_bin, nb_counts, np.sqrt(variance)
 
-    def calibrate(peak_list: list, display: bool = False, plot: bool =False):
+    def calibrate(self, interval_list: list, peak_list: list, display: bool = False, plot: bool = False):
         """
         Perform the calibration.
 
         Parameters
         ----------
-        peak_list: list
+        interval_list: list
             List of tuples (start, end) delimiting all calibration peaks.
+        peak_list: list
+            List of known energies to match to the observed peaks.
         display: bool, optional
             Default: False. If True, displays calibration results.
         plot: bool, optional
@@ -182,15 +186,15 @@ class Data:
         nominal_bins = [] #list of nominal bins, for each peak
         quadratic_deviations = [] #list of mean quadratic deviations from nominal bin, for each peak
         filtered_data = self.filter_peaks()
-        for idx_start, idx_end in peak_list:
+        for idx_start, idx_end in interval_list:
             nominal_bin, nb_counts, qd = filtered_data.compute_stats(idx_start,idx_end)
             nominal_bins.append([nominal_bin])
             quadratic_deviations.append(qd)
             if display:
                 print(
-                    f"bins n°{int(nominal_bin)}\n"
-                    f".. moyenne nominale : {int(nb_counts)}\n"
-                    f".. écart-type       : {std:.3f}"
+                    f"Bin number {nominal_bin}\n"
+                    f".. number of counts         = {nb_counts}\n"
+                    f".. mean quadratic deviation = {qd:.3f}"
                 )
 
         if plot: self.plot_data() #plot the data and show the filter
@@ -198,7 +202,7 @@ class Data:
         # perform the calibration
         nominal_bins = np.array(nominal_bins)
         quadratic_dev = min(quadratic_deviations)
-        nominal_energies = np.array([5.16, 5.486, 5.805]) #known energies in MeV
+        nominal_energies = np.array(peak_list) #known energies in MeV
 
         # linear regression
         model = LinearRegression()
@@ -210,10 +214,14 @@ class Data:
         convert = lambda x: (slope * x + intercept)
 
         quadratic_dev = convert(quadratic_dev) #convert bins into MeV
+
         if display:
-            print('slope    =    ', convert(1) - convert(0))
-            print('intercept  =  ', convert(0))
-            print('uncertainty = ', quadratic_dev)
+            print("Calibration\n"
+                f".. slope       = {slope} MeV\n"
+                f".. intercept   = {intercept} MeV\n"
+                f".. uncertainty = {quadratic_dev} MeV\n"
+                f".. R²          = {r2}"
+            )
 
         return convert, quadratic_dev, r2
 
@@ -247,20 +255,27 @@ class Data:
         callable
             Fitted function.
         """
+        # fit the histogram
         fit_function = lambda x, mean, std_dev, amplitude, slope, intercept: (amplitude * np.exp(-0.5 * ((x - mean) / std_dev) ** 2) + slope * x + intercept) #function we want to fit to the data
         initial_guess = [mean, std_dev, amplitude, slope, intercept] #initial guess for the parameters
         params, covariance = curve_fit(fit_function, self.data[interval_start:interval_end, 0], self.data[interval_start:interval_end, 1], p0=initial_guess) #fit the Gaussian function to the histogram data
         fitted_mean, fitted_std_dev, fitted_amplitude, fitted_slope, fitted_intercept = params
-        nb_counts = int(fitted_amplitude * fitted_std_dev * np.sqrt(np.pi))
+
+        # compute the number of counts
+        #nb_counts = int(fitted_amplitude * fitted_std_dev * np.sqrt(np.pi))
+        noise = fitted_slope/2 * (interval_end**2 - interval_start**2) + fitted_intercept * (interval_end - interval_start)
+        nb_counts = sum(self.data[interval_start:interval_end, 1]) - noise
         fitted_function = lambda x: fit_function(x, fitted_mean, fitted_std_dev, fitted_amplitude, fitted_slope, fitted_intercept)
 
         if display:
             print(
-                'fitted mean    =   ', fitted_mean, '\n'
-                'fitted std dev  =  ', fitted_std_dev, '\n'
+                'fitted mean      = ', fitted_mean, '\n'
+                'fitted std dev   = ', fitted_std_dev, '\n'
                 'fitted amplitude = ', fitted_amplitude, '\n'
-                'fitted slope    =  ', fitted_slope, '\n'
-                'fitted intercept = ', fitted_intercept
+                'fitted slope     = ', fitted_slope, '\n'
+                'fitted intercept = ', fitted_intercept, '\n'
+                'noise            = ', noise, '\n'
+                'number of counts = ', nb_counts
             )
 
         return nb_counts, fitted_function
