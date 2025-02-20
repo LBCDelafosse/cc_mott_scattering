@@ -148,9 +148,7 @@ class Data:
         tuple
             Tuple containing the bins, the number of hits and the mean quadratic deviation to the nominal bin in bin units.
         """
-        nominal_bin, nb_counts = max(self.data, key=lambda x: x[1]) #get the max
-        #nominal_bin = int(nominal_bin)
-        #nb_counts = int(nb_counts)
+        nominal_bin, nb_counts = max(self.data[interval_start:interval_end, :], key=lambda x: x[1]) #get the max
 
         variance = 0 #initialize the square of the mean quadratic deviation (not a true variance)
         normalization_cst = 0 #initialize the normalization constant
@@ -187,6 +185,7 @@ class Data:
         quadratic_deviations = [] #list of mean quadratic deviations from nominal bin, for each peak
         filtered_data = self.filter_peaks()
         for idx_start, idx_end in interval_list:
+            print(idx_start, idx_end)
             nominal_bin, nb_counts, qd = filtered_data.compute_stats(idx_start,idx_end)
             nominal_bins.append([nominal_bin])
             quadratic_deviations.append(qd)
