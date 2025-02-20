@@ -5,7 +5,19 @@ from sklearn.linear_model import LinearRegression
 from sklearn.metrics import r2_score
 from collision import *
 from data import *
-import data_extraction as dt
+from functions import *
+
+
+# figure setup
+plt.rcParams.update(
+    {
+        "text.usetex": True,
+        "font.family": "serif",
+        "font.size": 14,
+        "figure.figsize": (8, 5),
+        "figure.constrained_layout.use": True,
+    }
+)
 
 
 def plot_carbon_gold_cross_section():
@@ -27,7 +39,7 @@ def plot_carbon_gold_cross_section():
     xlabel = 'Scattering angle (°)'
     ylabel = 'Cross-section (mb/sr)'
     angles *= 180/np.pi #conversion in degrees
-    dt.plot([angles for _ in range(2)], [au_cross_sections, c_cross_sections], ['r--', 'k--'], ['Gold', 'Carbon'], xlabel, ylabel, log=True, show=True)
+    plot([angles for _ in range(2)], [au_cross_sections, c_cross_sections], ['r--', 'k--'], ['Gold', 'Carbon'], xlabel, ylabel, log=True, show=True)
 
 def plot_mott_section():
     # set the conditions of the experiment
@@ -58,7 +70,7 @@ def plot_mott_section():
     xlabel = 'Scattering angle (°)'
     ylabel = 'Cross-section (mb/sr)'
     angles *= 180/np.pi #conversion in degrees
-    dt.plot([angles for _ in range(3)], [spin0_cross_sections, spin1_cross_sections, spin2_cross_sections], ['k-','b--','r:'], ['I=0','I=1','I=2'], xlabel, ylabel, log=True, show=True)
+    plot([angles for _ in range(3)], [spin0_cross_sections, spin1_cross_sections, spin2_cross_sections], ['k-','b--','r:'], ['I=0','I=1','I=2'], xlabel, ylabel, log=True, show=True)
 
 def calibration():
     data = create_data_from_filename("calibration_data.asc")
