@@ -104,13 +104,12 @@ def theoretical_nb_counts():
 
 def fit_peak():
     # set the conditions of the experiment
-    angle = np.pi / 2
-    #angle = 140 * np.pi / 180
+    #angle = np.pi / 2
+    angle = 120 * np.pi / 180
     detector_solid_angle = 2*np.pi * (1. - 1. / np.sqrt(1. + (0.5/123.)**2)) #solid angle occupied by the detector
     Z1,A1,Z2,A2 = 1,1,79,197
     E_beam = 3. #lab frame energy of the beam particles
     faraday_count = 10149
-    #faraday_count = 8310
 
     collision = Collision(angle, detector_solid_angle, Z1, A1, Z2, A2, E_beam)
     collision.set_nb_particles_from_faraday(faraday_count)
@@ -121,10 +120,9 @@ def fit_peak():
 
     # extract experimental data from the file
     data = create_data_from_filename("Exp/Beam2_90Deg_PosA/CardStella_0122_histo_V1.asc")
-    #data = create_data_from_filename("Exp/Beam11_140Deg_PosB/CardStella_0122_histo_V1.asc")
 
     # compute experimental cross-section
-    nb_counts, fitted_function = data.compute_experimental_number_of_counts(6593, 10000, 7.2e3, 50., 50., 0., 2., display=True) #retrieve experimental number of counts and number of counts per bin
+    nb_counts, fitted_function = data.compute_experimental_number_of_counts(6200, 7500, 7.2e3, 50., 50., 0., 2., display=True) #retrieve experimental number of counts and number of counts per bin
     cross_section = data.compute_experimental_cross_section(collision, nb_counts) #compute cross-section
 
     y_fit = fitted_function(data[:, 0])
@@ -142,28 +140,54 @@ def fit_peak():
     plt.show()
 
 def get_experimental_cross_sections():
-    # define lists which associate a data file to each lab frame angle in degrees
+    # define lists of angles
     # each list corresponds to a different position of the target
+    angles_A = np.array([60, 70, 80, 90])
+    angles_B = np.array([90, 100, 110, 120, 130])
+    nb_files_A = len(angles_A)
+    nb_files_B = len(angles_B)
+
+    # define number of counts
+    faraday_counts_A = np.array([3206, 4206, 4595, 10149])
+    faraday_counts_B = np.array([8472, 9714, 12563, 14391, 20078])
+
+    # list of intervals for searching the Au peak
+    intervals_A = [
+        (4900, 7500),
+        (5000, 7500),
+        (5000, 7500),
+        (6200, 7500)
+    ]
+    intervals_B = [
+        (6100, 7400),
+        (5900, 7400),
+        (5800, 7400),
+        (5500, 7170),
+        (5500, 7170)
+    ]
+    
+    # lists of data files
     file_list_A = np.array([
-        [60, 3206, "Exp/Beam5_60Deg_PosA/CardStella_0122_histo_V1.asc"],
-        [70, 4206, "Exp/Beam4_70Deg_PosA/CardStella_0122_histo_V1.asc"],
-        [80, 4595, "Exp/Beam3_80Deg_PosA/CardStella_0122_histo_V1.asc"],
-        [90, 10149, "Exp/Beam2_90Deg_PosA/CardStella_0122_histo_V1.asc"]
+        "Exp/Beam5_60Deg_PosA/CardStella_0122_histo_V1.asc",
+        "Exp/Beam4_70Deg_PosA/CardStella_0122_histo_V1.asc",
+        "Exp/Beam3_80Deg_PosA/CardStella_0122_histo_V1.asc",
+        "Exp/Beam2_90Deg_PosA/CardStella_0122_histo_V1.asc"
     ])
     file_list_B = np.array([
-        [90, 8472, "Exp/Beam6_90Deg_PosB/CardStella_0122_histo_V1.asc"],
-        [100, 9714, "Exp/Beam7_100Deg_PosB/CardStella_0122_histo_V1.asc"],
-        [110, 12563, "Exp/Beam8_110Deg_PosB/CardStella_0122_histo_V1.asc"],
-        [120, 14391, "Exp/Beam9_120Deg_PosB/CardStella_0122_histo_V1.asc"],
-        [130, 20078, "Exp/Beam10_130Deg_PosB/CardStella_0122_histo_V1.asc"]
-        #[140, 8310, "Exp/Beam11_140Deg_PosB/CardStella_0122_histo_V1.asc"]
-        #[125, "Exp/Beam12_125Deg_PosB/CardStella_0122_histo_V1.asc"]
+        "Exp/Beam6_90Deg_PosB/CardStella_0122_histo_V1.asc",
+        "Exp/Beam7_100Deg_PosB/CardStella_0122_histo_V1.asc",
+        "Exp/Beam8_110Deg_PosB/CardStella_0122_histo_V1.asc",
+        "Exp/Beam9_120Deg_PosB/CardStella_0122_histo_V1.asc",
+        "Exp/Beam10_130Deg_PosB/CardStella_0122_histo_V1.asc"
     ])
 
     # set the conditions of the experiment
     detector_solid_angle = 2*np.pi * (1. - 1. / np.sqrt(1. + (0.5/123.)**2)) #solid angle occupied by the detector
     Z1,A1 = 1,1
     E_beam = 3. #lab frame energy of the beam particles
+    target_angle = 30 * np.pi/180
+    relative_uncertainty = 2.*np.pi/180 * cotan(target_angle)
+    print(relative_uncertainty)
 
     theta_start = 50 #lab frame angle in degrees
     theta_stop = 150 #lab frame angle in degrees
@@ -177,72 +201,72 @@ def get_experimental_cross_sections():
         #c_cross_sections.append(c_collision.compute_rutherford_cross_section())
     theoretical_au_cross_sections = np.array(theoretical_au_cross_sections)
 
-    angles_A = []
     experimental_au_cross_sections_A = []
-    angles_B = []
     experimental_au_cross_sections_B = []
-
-    nb_files_A = len(file_list_A)
-    nb_files_B = len(file_list_B)
 
     for index in range(nb_files_A):
 
-        angles_A.append(file_list_A[index, 0])
-
-        au_collision = Collision(float(file_list_A[index, 0]) * np.pi/180, detector_solid_angle, Z1, A1, 79, 197, E_beam)
-        au_collision.set_nb_particles_from_faraday(int(file_list_A[index, 1]))
+        au_collision = Collision(angles_A[index] * np.pi/180, detector_solid_angle, Z1, A1, 79, 197, E_beam)
+        au_collision.set_nb_particles_from_faraday(faraday_counts_A[index])
         au_collision.set_target_density_from_mass_density(80.)
 
+        interval = intervals_A[index]
+
         # extract experimental data from the file
-        data = create_data_from_filename(file_list_A[index, 2])
+        data = create_data_from_filename(file_list_A[index])
 
         # compute experimental cross-section
-        nb_counts, fitted_function = data.compute_experimental_number_of_counts(6593, 10000, 7e3, 50., 50., 0., 2., display=False) #retrieve experimental number of counts and number of counts per bin
+        nb_counts, fitted_function = data.compute_experimental_number_of_counts(interval[0], interval[1], 7.2e3, 50., 50., 0., 2., display=False) #retrieve experimental number of counts and number of counts per bin
         experimental_au_cross_sections_A.append(data.compute_experimental_cross_section(au_collision, nb_counts)) #compute cross-section
 
     for index in range(nb_files_B):
 
-        angles_B.append(file_list_B[index, 0])
-
-        au_collision = Collision(float(file_list_B[index, 0]) * np.pi/180, detector_solid_angle, Z1, A1, 79, 197, E_beam)
-        au_collision.set_nb_particles_from_faraday(int(file_list_B[index, 1]))
+        au_collision = Collision(angles_B[index] * np.pi/180, detector_solid_angle, Z1, A1, 79, 197, E_beam)
+        au_collision.set_nb_particles_from_faraday(faraday_counts_B[index])
         au_collision.set_target_density_from_mass_density(80.)
 
+        interval = intervals_B[index]
+
         # extract experimental data from the file
-        data = create_data_from_filename(file_list_B[index, 2])
+        data = create_data_from_filename(file_list_B[index])
 
         # compute experimental cross-section
-        nb_counts, fitted_function = data.compute_experimental_number_of_counts(6593, 10000, 7e3, 50., 50., 0., 2., display=False) #retrieve experimental number of counts and number of counts per bin
+        nb_counts, fitted_function = data.compute_experimental_number_of_counts(interval[0], interval[1], 7.2e3, 50., 50., 0., 2., display=False) #retrieve experimental number of counts and number of counts per bin
         experimental_au_cross_sections_B.append(data.compute_experimental_cross_section(au_collision, nb_counts)) #compute cross-section
 
-    angles_A = np.array(angles_A)
-    angles_B = np.array(angles_B)
     experimental_au_cross_sections_A = np.array(experimental_au_cross_sections_A)
+    au_uncertainties_A = relative_uncertainty * experimental_au_cross_sections_A
     experimental_au_cross_sections_B = np.array(experimental_au_cross_sections_B)
+    au_uncertainties_B = relative_uncertainty * experimental_au_cross_sections_B
+    print(au_uncertainties_A)
 
     # plot
     plt.rcParams.update({
-        "font.family": "serif",   # Type of font
-        "xtick.labelsize": "20",  # Size of the xtick label
-        "ytick.labelsize": "20",  # Size of the ytick label
-        "lines.linewidth": "3",   # Width of the curves
-        "legend.framealpha": "1", # Transparency of the legend frame
-        "legend.fontsize": "23",  # Size of the legend
-        "grid.linestyle":"--",    # Grid formed by dashed lines
-        "text.usetex": True       # Using LaTex style for text and equation
+        'font.family': 'serif',   # Type of font
+        'xtick.labelsize': '20',  # Size of the xtick label
+        'ytick.labelsize': '20',  # Size of the ytick label
+        'lines.linewidth': '3',   # Width of the curves
+        'legend.framealpha': '1', # Transparency of the legend frame
+        'legend.fontsize': '23',  # Size of the legend
+        'axes.labelsize' : '23',  # Size of the axes' labels
+        'grid.linestyle':'--',    # Grid formed by dashed lines
+        'text.usetex': True       # Using LaTex style for text and equation
     })
 
     plt.figure()
 
-    plt.scatter(angles_A, experimental_au_cross_sections_A, marker='o', color='r', label='Position A')
-    plt.scatter(angles_B, experimental_au_cross_sections_B, marker='o', color='b', label='Position B')
+    #plt.scatter(angles_A, experimental_au_cross_sections_A, marker='o', color='r', label='Position A')
+    plt.errorbar(angles_A, experimental_au_cross_sections_A, yerr=au_uncertainties_A, linestyle='none', marker='.', color='r', label='Position A')
+    #plt.scatter(angles_B, experimental_au_cross_sections_B, marker='o', color='b', label='Position B')
+    plt.errorbar(angles_B, experimental_au_cross_sections_B, yerr=au_uncertainties_B, linestyle='none', marker='.', color='b', label='Position B')
     plt.plot(angles, theoretical_au_cross_sections, 'k-', label='Rutherford')
 
     plt.xlabel('Scattering angle (°)')
-    plt.ylabel('Cross_section (mb/sr)')
+    plt.ylabel('Cross-section (mb/sr)')
 
     #plt.yscale('log')
     plt.legend(loc='best')
+    plt.tight_layout()
     plt.show()
 
 if __name__ == "__main__":
@@ -254,7 +278,7 @@ if __name__ == "__main__":
     get_experimental_cross_sections()
 
     #data = create_data_from_filename("Exp/Beam11_140Deg_PosB/CardStella_0122_histo_V1.asc")
-    #data = create_data_from_filename("Exp/Beam10_130Deg_PosB/CardStella_0122_histo_V1.asc")
+    #data = create_data_from_filename("Exp/Beam9_120Deg_PosB/CardStella_0122_histo_V1.asc")
     #data.plot_data()
 
 

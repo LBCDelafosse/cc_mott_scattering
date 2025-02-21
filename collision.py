@@ -18,6 +18,12 @@ def cosec(x):
     """
     return 1./np.sin(x)
 
+def cotan(x):
+    """
+    Compute the trigonometric cotangent function.
+    """
+    return np.cos(x)/np.sin(x)
+
 class Collision:
     """
     Object containing the parameters of an elastic collision in a collision experiment.
@@ -48,7 +54,7 @@ class Collision:
         nb_particles: int, optional
             Default: 0. Number of particles in the incident beam.
         target_density: float, optional
-            Default: 0. Number of scattering centres per squared meter.
+            Default: 0. Number of scattering centres per squared meter in the plane orthogonal to the beam.
         """
         self.detector_angle = detector_angle
         self.detector_solid_angle = detector_solid_angle

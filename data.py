@@ -261,9 +261,9 @@ class Data:
         fitted_mean, fitted_std_dev, fitted_amplitude, fitted_slope, fitted_intercept = params
 
         # compute the number of counts
-        #nb_counts = int(fitted_amplitude * fitted_std_dev * np.sqrt(np.pi))
+        nb_counts = int(fitted_amplitude * fitted_std_dev * np.sqrt(2*np.pi))
         noise = fitted_slope/2 * (interval_end**2 - interval_start**2) + fitted_intercept * (interval_end - interval_start)
-        nb_counts = sum(self.data[interval_start:interval_end, 1]) - noise
+        #nb_counts = sum(self.data[interval_start:interval_end, 1]) - noise
         fitted_function = lambda x: fit_function(x, fitted_mean, fitted_std_dev, fitted_amplitude, fitted_slope, fitted_intercept)
 
         if display:
