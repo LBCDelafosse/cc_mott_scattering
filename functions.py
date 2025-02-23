@@ -33,6 +33,7 @@ def plot(xaxes, yaxes, linetypes, labels, xlabel, ylabel, log=False, show=True, 
         "lines.linewidth": "3",   # Width of the curves
         "legend.framealpha": "1", # Transparency of the legend frame
         "legend.fontsize": "23",  # Size of the legend
+        'axes.labelsize' : '23',  # Size of the axes' labels
         "grid.linestyle":"--",    # Grid formed by dashed lines
         "text.usetex": True       # Using LaTex style for text and equation
     })

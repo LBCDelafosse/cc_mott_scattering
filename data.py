@@ -185,7 +185,6 @@ class Data:
         quadratic_deviations = [] #list of mean quadratic deviations from nominal bin, for each peak
         filtered_data = self.filter_peaks()
         for idx_start, idx_end in interval_list:
-            print(idx_start, idx_end)
             nominal_bin, nb_counts, qd = filtered_data.compute_stats(idx_start,idx_end)
             nominal_bins.append([nominal_bin])
             quadratic_deviations.append(qd)
@@ -215,7 +214,7 @@ class Data:
         quadratic_dev = convert(quadratic_dev) #convert bins into MeV
 
         if display:
-            print("Calibration\n"
+            print("Calibration results\n"
                 f".. slope       = {slope} MeV\n"
                 f".. intercept   = {intercept} MeV\n"
                 f".. uncertainty = {quadratic_dev} MeV\n"

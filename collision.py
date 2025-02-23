@@ -57,6 +57,7 @@ class Collision:
             Default: 0. Number of scattering centres per squared meter in the plane orthogonal to the beam.
         """
         self.detector_angle = detector_angle
+        self.COM_angle = None
         self.detector_solid_angle = detector_solid_angle
         self.Z1 = Z1
         self.A1 = A1
@@ -94,23 +95,27 @@ class Collision:
 
     # Modifiers
 
-    def set_detector_angle_from_COM_angle(self, COM_angle):
+    def set_detector_angle_from_COM_angle(self, COM_angle, display=False):
         """
-        Set the instance attribute detector_angle from the centre-of-mass angle.
+        Set the instance attributes detector_angle and E_COM from the centre-of-mass angle.
 
         Parameters
         ----------
         COM_angle: float
             Detector angle in the centre-of-mass frame in radians.
+        display: boolean, optional
+            Default: False. If True, displays the detector angle in the lab frame, in radians.
 
         Returns
         -------
         float
             Detector angle in the lab frame in radians.
         """
+        self.COM_angle = COM_angle
         gamma, conversion_constant = self._compute_conversion_constants(-1)
         self.detector_angle = np.arctan( np.sin(COM_angle) / (np.cos(COM_angle) + gamma) )
         if self.detector_angle < 0: self.detector_angle += np.pi
+        if display: print('detector angle =', self.detector_angle * 180/np.pi, '°')
         return self.detector_angle
 
     def set_nb_particles_from_intensity(self, beam_intensity, duration):
@@ -216,9 +221,9 @@ class Collision:
         if display: print(E_COM)
         return E_COM
 
-    def compute_COM_angle(self, display=False):
+    def _compute_COM_angle(self, display=False):
         """
-        Compute the detector angle in the COM frame.
+        Private method. Compute the detector angle in the COM frame.
 
         Parameters
         ----------
@@ -232,9 +237,9 @@ class Collision:
         """
         gamma, conversion_constant = self._compute_conversion_constants(+1)
         COM_angle = np.arcsin( np.sin(self.detector_angle) * conversion_constant )
-        if self.detector_angle > np.pi/2:
+        if self.detector_angle > 90 * np.pi/180:
             COM_angle = np.pi - COM_angle
-        if display: print(COM_angle)
+        if display: print('COM angle =', COM_angle * 180/np.pi, '°')
         return COM_angle
 
     def compute_detected_energy(self, display=False):
@@ -249,11 +254,11 @@ class Collision:
         Returns
         -------
         float
-            Detector angle in the COM frame, in radians.
+            Detected energy deposited by each scattered particle, in MeV.
         """
         gamma, conversion_constant = self._compute_conversion_constants(-1)
         detected_energy = self.A1**2 * E_beam / (self.A1 + self.A2)**2 * conversion_constant**2 / gamma**2
-        if display: print(detected_energy)
+        if display: print('detected energy =', detected_energy, 'MeV')
         return detected_energy
 
     def compute_rutherford_cross_section(self, display=False):
@@ -270,8 +275,28 @@ class Collision:
         float
             Theoretical Rutherford cross-section in the centre-of-mass frame, in mb/sr.
         """
-        COM_angle = self.compute_COM_angle(display=display)
+        if self.COM_angle == None: COM_angle = self._compute_COM_angle(display=display)
+        else: COM_angle = self.COM_angle
         cross_section = self.__n**2 / (4. * self.__k**2) * cosec(COM_angle/2.)**4 * 1e31
+        if display: print('cross section =', cross_section, 'mb/sr')
+        return cross_section
+
+    def compute_lab_rutherford_cross_section(self, display=False):
+        """
+        Compute the theoretical number of counts for the detected energy (Rutherford scattering).
+
+        Parameters
+        ----------
+        display: boolean, optional
+            Default: False. If True, displays the result of the computation.
+
+        Returns
+        -------
+        tuple
+            Tuple containing: the detected energy in MeV, the theoretical number of counts in the detector.
+        """
+        gamma, conversion_constant = self._compute_conversion_constants(-1)
+        cross_section = self.compute_rutherford_cross_section() * conversion_constant**2 / np.sqrt(1. - gamma**2 * np.sin(self.detector_angle)**2) #take the cross-section to the lab frame, in mb/sr
         if display: print(cross_section)
         return cross_section
 
@@ -289,9 +314,10 @@ class Collision:
         Returns
         -------
         float
-            Theoretical Mott cross-section in the centre-of-mass, in mb/sr.
+            Theoretical Mott cross-section in the centre-of-mass frame, in mb/sr.
         """
-        COM_angle = self.compute_COM_angle(display=display)
+        if self.COM_angle == None: COM_angle = self._compute_COM_angle(display=display)
+        else: COM_angle = self.COM_angle
         cross_section = self.__n**2 / (4. * self.__k**2) * ( cosec(COM_angle/2.)**4 + sec(COM_angle/2.)**4 + 2*(-1)**(2*total_spin)/(2*total_spin+1) * np.cos(self.__n * np.log(np.tan(COM_angle/2.)**2)) * cosec(COM_angle/2.)**2 * sec(COM_angle/2.)**2 ) * 1e31
         if display: print(cross_section)
         return cross_section
@@ -327,15 +353,16 @@ class Collision:
 if __name__ == "__main__":
     print('Test script')
     det_solid_angle = 2*np.pi * (1. - 1. / np.sqrt(1. + (0.5/130.)**2)) #solid angle occupied by the detector
-    Z1,A1,Z2,A2 = 1,1,79,197 #collision on gold
+    Z1,A1,Z2,A2 = 1,1,6,12 #collision on carbon
     faraday_count = 10149
     au_mass_density = 80. #surface density in µg/cm²
     c_mass_density = 10. #surface density in µg/cm²
-    au_collision = Collision(np.pi/2, det_solid_angle, Z1, A1, Z2, A2, 3.)
-    au_collision.set_nb_particles_from_faraday(faraday_count)
-    au_collision.set_target_density_from_mass_density(au_mass_density)
-    au_collision.compute_rutherford_cross_section(display=False)
-    au_collision.compute_number_of_counts(display=True)
+    c_collision = Collision(np.pi/2, det_solid_angle, Z1, A1, Z2, A2, 3.)
+    c_collision.set_detector_angle_from_COM_angle(90.42542543 * np.pi/180, display=True)
+    c_collision.set_nb_particles_from_faraday(faraday_count)
+    c_collision.set_target_density_from_mass_density(au_mass_density)
+    c_collision.compute_rutherford_cross_section(display=True)
+    c_collision.compute_number_of_counts(display=False)
 
 
 
